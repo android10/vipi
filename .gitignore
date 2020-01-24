@@ -16,3 +16,9 @@ Cargo.lock
 
 /target
 #**/*.rs.bk
+
+
+#private vipi config files
+vpn.ovpn
+vpn.conf
+twofactorvpn.conf

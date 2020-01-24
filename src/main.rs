@@ -1,13 +1,20 @@
 use console::Term;
 use std::io::Result;
+use std::process::Command;
+use std::process::Output;
 
 fn main() {
-    process_two_factor_auth_code(read_two_factor_auth_code());
+    setup_ui();
+
+    let auth_code = read_two_factor_auth_code();
+    process_two_factor_auth_code(auth_code);
+}
+
+fn setup_ui() {
+    println!("Two Factor Authentication Code: ");
 }
 
 fn read_two_factor_auth_code() -> Result<String> {
-    println!("Two Factor Authentication Code: ");
-
     let console = Term::stdout();
     let read_value_result: Result<String> = console.read_line();
     
@@ -22,5 +29,24 @@ fn process_two_factor_auth_code(result: Result<String>) {
 }
 
 fn connect_to_vpn(two_factor_auth_code: &str) {
-    println!("{}", two_factor_auth_code);
+    let output = execute(two_factor_auth_code);
+    println!("status: {}", output.status);
+}
+
+fn execute(two_factor_auth_code: &str) -> Output {
+    //TODO: concatenate password to the file 'twofactorvpn.conf'
+    //TODO: where to save data in a safe way
+    //TODO: run command with sudo?
+    let output = Command::new("sudo openvpn")
+                     .arg("--config")
+                     .arg("vpn.ovpn")
+                     .arg("--auth-user-pass")
+                     .arg("twofactorvpn.conf")
+                     .arg("--auth-nocache")
+                     .output()
+                     .expect("failed to execute process");
+
+    assert!(output.status.success());
+
+    return output;
 }
